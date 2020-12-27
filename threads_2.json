@@ -1,0 +1,209 @@
+[
+  {
+    "attachment": {
+      "booking_details": {
+        "checkin_date": "2020-11-19",
+        "checkout_date": "2020-11-21",
+        "expected_payout_amount_accurate": "230.86",
+        "listing_id": 44592001,
+        "listing_name": "NEW BANFF APARTMENT | 1 Min from the Centre",
+        "nights": 3,
+        "non_response_at": null,
+        "number_of_guests": 1,
+        "number_of_adults": 1,
+        "number_of_children": 0,
+        "number_of_infants": 0,
+        "reservation_confirmation_code": "HPLQD42GJ4"
+      },
+      "roles": [
+        {
+          "role": "owner",
+          "user_ids": [
+            168764480
+          ]
+        },
+        {
+          "role": "guest",
+          "user_ids": [
+            339554577
+          ]
+        },
+        {
+          "role": "cohost",
+          "user_ids": [
+            
+          ]
+        },
+        {
+          "role": "booker",
+          "user_ids": [
+            
+          ]
+        }
+      ],
+      "status": "pending",
+      "type": "Reservation"
+    },
+    "business_purpose": "booking_direct_thread",
+    "id": 923020308,
+    "last_message_sent_at": "2020-09-04T09:31:57Z",
+    "updated_at": "2020-09-04T09:31:57Z",
+    "users": [
+      {
+        "first_name": "Aleks",
+        "id": 339554577,
+        "location": "Toronto, Canada",
+        "preferred_locale": "en"
+      },
+      {
+        "first_name": "Leavetown",
+        "id": 168764480,
+        "location": "Vancouver, Canada",
+        "preferred_locale": "en"
+      }
+    ],
+    "messages": [
+      {
+        "id": 6859974551,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-09-04T09:31:57Z",
+        "message": "Responding to test response",
+        "user_id": 339554577
+      },
+      {
+        "id": 6859974551,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-09-04T08:45:57Z",
+        "message": "Responding to test",
+        "user_id": 168764480
+      },
+      {
+        "id": 6859974551,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-09-04T08:31:57Z",
+        "message": "testing123",
+        "user_id": 339554577
+      },
+      {
+        "id": 6844581499,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-09-04T01:28:22Z",
+        "message": "asdasdasd",
+        "user_id": 339554577
+      },
+      {
+        "id": 6844237197,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-09-04T01:20:20Z",
+        "message": "he ther",
+        "user_id": 339554577
+      },
+      {
+        "id": 6374884273,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-08-20T10:54:38Z",
+        "message": "Cancelling",
+        "user_id": 339554577
+      },
+      {
+        "id": 6275976885,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-08-17T12:33:37Z",
+        "message": "Hey there this is leavetown",
+        "user_id": 168764480
+      }
+    ]
+  },
+  {
+    "attachment": {
+      "booking_details": {
+        "checkin_date": "2020-10-01",
+        "checkout_date": "2020-10-03",
+        "expected_payout_amount_accurate": "231.00",
+        "listing_id": 44754081,
+        "listing_name": "Great accommodation in the Superior Suite",
+        "nights": 2,
+        "non_response_at": null,
+        "number_of_guests": 1,
+        "number_of_adults": 1,
+        "number_of_children": 0,
+        "number_of_infants": 0,
+        "reservation_confirmation_code": null
+      },
+      "roles": [
+        {
+          "role": "owner",
+          "user_ids": [
+            168764480
+          ]
+        },
+        {
+          "role": "guest",
+          "user_ids": [
+            359501812
+          ]
+        },
+        {
+          "role": "cohost",
+          "user_ids": [
+            
+          ]
+        }
+      ],
+      "status": "pending",
+      "type": "Reservation"
+    },
+    "business_purpose": "booking_direct_thread",
+    "id": 924842273,
+    "last_message_sent_at": "2020-08-20T22:11:31Z",
+    "updated_at": "2020-08-20T22:11:31Z",
+    "users": [
+      {
+        "first_name": "Mieke",
+        "id": 359501812,
+        "location": null,
+        "preferred_locale": "en"
+      },
+      {
+        "first_name": "Leavetown",
+        "id": 168764480,
+        "location": "Vancouver, Canada",
+        "preferred_locale": "en"
+      }
+    ],
+    "messages": [
+       {
+        "id": 6387433967,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-08-20T22:11:31Z",
+        "message": "Great I think I'll take the booking",
+        "user_id": 359501812
+      },
+      {
+        "id": 6387433967,
+        "attachment_images": [
+          
+        ],
+        "created_at": "2020-08-20T21:11:31Z",
+        "message": "Hi! This is a test message",
+        "user_id": 359501812
+      }
+    ]
+  }
+]
