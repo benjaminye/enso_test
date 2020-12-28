@@ -1,5 +1,5 @@
+from abc import ABC, abstractmethod
 from typing import List
-import pprint
 import json
 import logging
 
@@ -25,8 +25,7 @@ class SyncAirbnb:
     """syncs airbnb threads with enso database"""
 
     def __init__(self, client):
-        self.messages = {}
-        self.guests = {}
+        self.db: DBAbstract = DBObject()
         self.client = client
 
     def __call__(self, step):
@@ -35,6 +34,14 @@ class SyncAirbnb:
             self._update_guest(thread)
             for msg in thread.messages():
                 self._update_message(thread.guest_id(), thread.host_id(), msg)
+
+    @property
+    def messages(self):
+        return self.db.messages
+
+    @property
+    def guests(self):
+        return self.db.guests
 
     def _create_message(self, guest_id, host_id, message):
         user = "owner" if message.user_id() == host_id else "guest"
@@ -45,7 +52,7 @@ class SyncAirbnb:
             channel="airbnb",
             sent=message.sent(),
         )
-        self.messages[guest_id].append(new_msg)
+        self.db.add_message(new_msg)
 
     def _create_guest(self, thread):
         guest_id = thread.guest_id()
@@ -55,8 +62,8 @@ class SyncAirbnb:
             name=thread.guest_name(),
             total_msgs=len(thread.messages()),
         )
-        self.messages[guest_id] = []
-        self.guests[guest_id] = new_guest
+
+        self.db.add_guest(new_guest)
 
     def _update_guest(self, thread):
         guest_id = thread.guest_id()
@@ -65,22 +72,95 @@ class SyncAirbnb:
             self._create_guest(thread)
             return
 
-        guest = self.guests[guest_id]
-        guest.updated_at = thread.updated_at()
-        guest.total_msgs = len(thread.messages())
+        self.db.update_guest_stat(guest_id, thread.updated_at(), len(thread.messages()))
 
     def _update_message(self, guest_id, host_id, message):
-        messages = self.messages[guest_id]
+        messages = self.db.messages_by_guest_id(guest_id)
 
         if not messages:
             self._create_message(guest_id, host_id, message)
             return
 
-        message_ts = [(msg.sent, msg.message) for msg in messages]
+        # I'm using (msg.sent, msg.message) to emulate a hash...
+        # ideally we'd implement some sort of hashing algorithm so each message has a unique ID
+        messages_hash = [(msg.sent, msg.message) for msg in messages]
 
-        if (message.sent(), message.message()) not in message_ts:
+        if (message.sent(), message.message()) not in messages_hash:
             self._create_message(guest_id, host_id, message)
-            messages.sort(key=lambda x: (x.sent, x.message), reverse=True)
+
+
+class DBAbstract(ABC):
+    @property
+    @abstractmethod
+    def messages(self):
+        pass
+
+    @property
+    @abstractmethod
+    def guests(self):
+        pass
+
+    @abstractmethod
+    def messages_by_guest_id(self, guest_id: int):
+        pass
+
+    @abstractmethod
+    def add_guest(self, guest: GuestModel):
+        pass
+
+    @abstractmethod
+    def add_message(self, message: MessageModel):
+        pass
+
+    @abstractmethod
+    def update_guest_stat(self, guest_id: int, updated_at: int, total_messages: int):
+        pass
+
+
+class DBObject(DBAbstract):
+    def __init__(self):
+        self._messages = {}
+        self._guests = {}
+
+    @property
+    def messages(self):
+        messages_sorted = {}
+        for guest_id, messages in self._messages.items():
+            messages_sorted[guest_id] = self._sort_messages(messages)
+
+        return messages_sorted
+
+    @property
+    def guests(self):
+        return self._guests
+
+    def messages_by_guest_id(self, guest_id: int):
+        messages = self._messages[guest_id]
+        return self._sort_messages(messages)
+
+    def add_guest(self, guest: GuestModel):
+        guest_id = int(guest.guest_id)
+        self._messages[guest_id] = []
+        self._guests[guest_id] = guest
+
+    def add_message(self, message):
+        guest_id = int(message.guest_id)
+        self._messages[guest_id].append(message)
+
+    def update_guest_stat(self, guest_id: int, updated_at: int, total_messages: int):
+        guest = self._guests[guest_id]
+        guest.updated_at = updated_at
+        guest.total_msgs = total_messages
+
+    def _sort_messages(self, messages: List[MessageModel]):
+        messages_sorted = sorted(
+            messages, key=lambda msg: (msg.sent, msg.message), reverse=True
+        )
+        return messages_sorted
+
+
+class DBDynamo(DBAbstract):
+    pass
 
 
 sync_1 = SyncAirbnb(AirbnbClient())
