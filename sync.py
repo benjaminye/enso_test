@@ -71,10 +71,19 @@ class SyncAirbnb:
         guest_id = str(thread.guest_id())
         host_id = str(thread.host_id())
 
-        if guest_id not in self.guests:
+        # Case 1: new host
+        try:
+            self.db.guests_by_host(host_id)
+        except KeyError:
             self._create_guest(thread)
             return
 
+        # Case 2: existing host / new guest
+        if guest_id not in self.db.guests_by_host(host_id):
+            self._create_guest(thread)
+            return
+
+        # Case 3: existing host / existing guest
         self.db.update_guest_stat(
             host_id, guest_id, thread.updated_at(), len(thread.messages())
         )
