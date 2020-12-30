@@ -24,8 +24,8 @@ class AirbnbClient:
 class SyncAirbnb:
     """syncs airbnb threads with enso database"""
 
-    def __init__(self, client):
-        self.db: DBAbstract = DBObject()
+    def __init__(self, client, db: DBAbstract):
+        self.db = db
         self.client = client
 
     def __call__(self, step):
@@ -71,25 +71,24 @@ class SyncAirbnb:
         guest_id = str(thread.guest_id())
         host_id = str(thread.host_id())
 
-        # Case 1: new host
-        try:
-            self.db.guests_by_host(host_id)
-        except KeyError:
-            self._create_guest(thread)
-            return
-
-        # Case 2: existing host / new guest
+        # Case 1: new guest
         if guest_id not in self.db.guests_by_host(host_id):
             self._create_guest(thread)
             return
 
-        # Case 3: existing host / existing guest
-        self.db.update_guest_stat(
-            host_id, guest_id, thread.updated_at(), len(thread.messages())
-        )
+        # Case 2: existing guest
+        guest = self.db.guests_by_host(host_id)[guest_id]
+        if thread.updated_at() != guest.updated_at:
+            self.db.update_guest_stat(
+                host_id,
+                guest_id,
+                guest.updated_at,
+                thread.updated_at(),
+                len(thread.messages()),
+            )
 
     def _update_message(self, guest_id, host_id, message):
-        messages = self.db.messages_by_host(host_id)[guest_id]
+        messages = self.db.messages_by_host_guest(host_id, guest_id)
 
         if not messages:
             self._create_message(guest_id, host_id, message)
@@ -104,12 +103,13 @@ class SyncAirbnb:
             self._create_message(guest_id, host_id, message)
 
 
-sync_1 = SyncAirbnb(AirbnbClient())
+sync_1 = SyncAirbnb(AirbnbClient(), DBObject())
 sync_1(1)
 sync_1(2)
 
-sync_2 = SyncAirbnb(AirbnbClient())
+sync_2 = SyncAirbnb(AirbnbClient(), DBDynamo("ben_enso_test"))
 sync_2(2)
+
 
 assert sync_1.guests == sync_2.guests
 assert sync_1.messages == sync_2.messages
