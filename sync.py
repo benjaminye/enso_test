@@ -33,7 +33,7 @@ class SyncAirbnb:
         for thread in airbnb_threads:
             self._update_guest(thread)
             for msg in thread.messages():
-                self._update_message(thread.guest_id(), thread.host_id(), msg)
+                self._update_message(str(thread.guest_id()), str(thread.host_id()), msg)
 
     @property
     def messages(self):
@@ -52,10 +52,12 @@ class SyncAirbnb:
             channel="airbnb",
             sent=message.sent(),
         )
-        self.db.add_message(new_msg)
+        self.db.add_message(host_id, new_msg)
 
     def _create_guest(self, thread):
-        guest_id = thread.guest_id()
+        guest_id = str(thread.guest_id())
+        host_id = str(thread.host_id())
+
         new_guest = GuestModel(
             guest_id=guest_id,
             updated_at=thread.updated_at(),
@@ -63,19 +65,22 @@ class SyncAirbnb:
             total_msgs=len(thread.messages()),
         )
 
-        self.db.add_guest(new_guest)
+        self.db.add_guest(host_id, new_guest)
 
     def _update_guest(self, thread):
-        guest_id = thread.guest_id()
+        guest_id = str(thread.guest_id())
+        host_id = str(thread.host_id())
 
         if guest_id not in self.guests:
             self._create_guest(thread)
             return
 
-        self.db.update_guest_stat(guest_id, thread.updated_at(), len(thread.messages()))
+        self.db.update_guest_stat(
+            host_id, guest_id, thread.updated_at(), len(thread.messages())
+        )
 
     def _update_message(self, guest_id, host_id, message):
-        messages = self.db.messages_by_guest_id(guest_id)
+        messages = self.db.messages_by_host(host_id)[guest_id]
 
         if not messages:
             self._create_message(guest_id, host_id, message)
