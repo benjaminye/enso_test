@@ -16,29 +16,47 @@ class DBAbstract(ABC):
     @property
     @abstractmethod
     def messages(self) -> Dict[str, Dict[str, List[MessageModel]]]:
+        """
+        Returns all messages stored within Database
+        """
         pass
 
     @property
     @abstractmethod
     def guests(self) -> Dict[str, Dict[str, GuestModel]]:
+        """
+        Returns all guests stored within Database
+        """
         pass
 
     @abstractmethod
     def messages_by_host_guest(self, host_id: str, guest_id: str) -> List[MessageModel]:
+        """
+        Returns all messages sent between a specific host and guest
+        """
         # TODO: Can implement some sort of timed lru chaching to reduce DB reads
         pass
 
     @abstractmethod
     def guests_by_host(self, host_id: str) -> List[GuestModel]:
+        """
+        Returns all guests of a specific host
+        """
         # TODO: Can implement some sort of timed lru chaching to reduce DB reads
         pass
 
     @abstractmethod
     def add_guest(self, host_id: str, guest: GuestModel):
+        """
+        Add a guest into database
+        """
         pass
 
     @abstractmethod
     def add_message(self, host_id: str, message: MessageModel):
+        """
+        Add a message into database
+        """
         pass
 
     @abstractmethod
@@ -50,10 +68,17 @@ class DBAbstract(ABC):
         new_updated_at: int,
         new_total_messages: int,
     ):
+        """
+        Update updated_at and total_msgs stats of an existing guest thread
+        """
         pass
 
 
 class DBObject(DBAbstract):
+    """
+    Implementation of database using object
+    """
+
     def __init__(self):
         self._messages = {}
         self._guests = {}
@@ -115,7 +140,7 @@ class DBObject(DBAbstract):
         guest.updated_at = new_updated_at
         guest.total_msgs = new_total_messages
 
-    def _sort_messages(self, messages: List[MessageModel]) -> List[MessageModel]:
+    def _sort_messages(self, messages: List[MessageModel]):
         messages_sorted = sorted(
             messages, key=lambda msg: (msg.sent, msg.message), reverse=True
         )
@@ -127,10 +152,16 @@ class DBObject(DBAbstract):
 
 
 class DBDynamo(DBAbstract):
+    """
+    Implementation of database using DynamoDB
+    """
+
     def __init__(self, table_name):
         try:
+            # connect to an existing DynamoDB with specified name
             self.table = self._connect_table(table_name)
         except ClientError:
+            # if doesn't exist, create one with the correct spec
             self.table = self._create_table(table_name)
 
     @property
@@ -276,6 +307,7 @@ class DBDynamo(DBAbstract):
         response = self.table.query(**query_parameters)
         data = response["Items"]
 
+        # append data if response is paginated
         while "LastEvaluatedKey" in response:
             response = self.table.query(ExclusiveStartKey=response["LastEvaluatedKey"])
             data.extend(response["Items"])

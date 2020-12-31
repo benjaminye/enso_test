@@ -101,15 +101,3 @@ class SyncAirbnb:
 
         if current_hash not in messages_hash:
             self._create_message(guest_id, host_id, message)
-
-
-sync_1 = SyncAirbnb(AirbnbClient(), DBObject())
-sync_1(1)
-sync_1(2)
-
-sync_2 = SyncAirbnb(AirbnbClient(), DBDynamo("ben_enso_test"))
-sync_2(2)
-
-
-assert sync_1.guests == sync_2.guests
-assert sync_1.messages == sync_2.messages
