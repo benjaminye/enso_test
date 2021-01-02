@@ -94,14 +94,16 @@ def mock_thread_two_step_three(mock_message_four):
     mock.guest_id.return_value = "003"
     mock.updated_at.return_value = 1200
     mock.host_id.return_value = "001"
-    mock.messages.return_value = mock_message_four
+    mock.messages.return_value = [mock_message_four]
     mock.guest_name.return_value = "Guest 003"
 
     return mock
 
 
 @pytest.fixture
-def mock_client(mock_step_one, mock_step_two):
+def mock_client(
+    mock_thread_one_step_one, mock_thread_one_step_two, mock_thread_two_step_three
+):
     def side_effect(step):
         vals = {
             1: [mock_thread_one_step_one],
@@ -114,12 +116,3 @@ def mock_client(mock_step_one, mock_step_two):
     client.get_messages.side_effect = side_effect
 
     return client
-
-
-@pytest.fixture
-def mock_db_step_zero():
-    mock = Mock(name="database at time 0")
-    mock.messages_by_host_guest.return_value = []
-    mock.guest_by_host.return_value = []
-
-    return mock
