@@ -76,7 +76,22 @@ def test_update_guest_new_guest(sync, mock_thread_one_step_one):
 
 
 @pytest.mark.skip
-def test_update_guest_same_guest_db_reads(sync, mock):
+def test_update_guest_existing_guest_same_stat(sync, mock_thread_one_step_one):
+    sync.db.guests_by_host.return_value = []
+    sync._update_guest(mock_thread_one_step_one)
+
+    expected_guest = GuestModel(
+        guest_id=mock_thread_one_step_one.guest_id(),
+        updated_at=mock_thread_one_step_one.updated_at(),
+        total_msgs=len(mock_thread_one_step_one.messages()),
+        name=mock_thread_one_step_one.guest_name(),
+    )
+
+    sync.db.add_guest.assert_called_once_with("001", expected_guest)
+
+
+@pytest.mark.skip
+def test_update_guest_existing_guest_different_stat(sync, mock_thread_one_step_one):
 
     existing_guest = GuestModel(
         guest_id=mock_thread_one_step_one.guest_id(),
