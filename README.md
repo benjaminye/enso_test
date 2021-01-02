@@ -89,8 +89,8 @@ By default, the table will be created with 5 RCUs and 5WCUs; to change the behav
 # DynamoDB schema
 |itemType (partition_key)|itemID(sort_key)  | itemData |
 |--|--|--|
-| guest | host_id#updated_at#guest_id | {guest_id: "111", sent: 1000, ...} |
-| msg | host_id#sent#*hash* |{guest_id: "111", updated_at: 1000, ...} |
+| guest | host_id#updated_at#guest_id | {guest_id: "111", updated_at: 1000, ...} |
+| msg | host_id#sent#*hash* |{guest_id: "111", sent: 1000, ...} |
 
 **Note:** *hash* is used to prevent key collision when there are multiple messages sent at the same timestamp. Current implementation of the hash is such that the **first** and **second** message with the same timestamp will have hash of **0** and **1**, respectively.  
 
