@@ -79,6 +79,7 @@ class SyncAirbnb:
         # Case 2: existing guest
         guest = self.db.guests_by_host(host_id)[guest_id]
         if thread.updated_at() != guest.updated_at:
+            # update stat only if there are new messages
             self.db.update_guest_stat(
                 host_id,
                 guest_id,
@@ -91,9 +92,11 @@ class SyncAirbnb:
         messages = self.db.messages_by_host_guest(host_id, guest_id)
 
         if not messages:
+            # if there are no existing messages, add message into a database without checking
             self._create_message(guest_id, host_id, message)
             return
 
+        # if there are existing messages, check if message is already in database
         # I'm using (msg.sent, msg.message) to emulate a hash...
         # ideally we'd implement some sort of hashing algorithm server-side so each message is uniquely identifiable
         messages_hash = [(msg.sent, msg.message) for msg in messages]
