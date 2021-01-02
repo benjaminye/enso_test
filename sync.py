@@ -81,7 +81,10 @@ class SyncAirbnb:
 
         # Case 2: existing guest
         guest = guest_list[guest_id_list.index(guest_id)]
-        if thread.updated_at() != guest.updated_at:
+        if (
+            thread.updated_at() != guest.updated_at
+            or len(thread.messages()) != guest.total_msgs
+        ):
             # update stat only if there are new messages
             self.db.update_guest_stat(
                 host_id,

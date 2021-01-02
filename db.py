@@ -262,7 +262,7 @@ class DBDynamo(DBAbstract):
         old_guest = self.table.get_item(**old_key)["Item"]["itemData"]
 
         # delete old record
-        self.table.delete_item(Key={"itemType": "guest", "itemID": old_key})
+        self.table.delete_item(**old_key)
 
         # update stat
         new_guest = GuestModel(**old_guest)
