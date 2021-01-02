@@ -71,14 +71,21 @@ class SyncAirbnb:
         guest_id = str(thread.guest_id())
         host_id = str(thread.host_id())
 
+        guest_list = self.db.guests_by_host(host_id)
+        guest_id_list = [guest.guest_id for guest in guest_list]
+
         # Case 1: new guest
-        if guest_id not in self.db.guests_by_host(host_id):
+        if guest_id not in guest_id_list:
             self._create_guest(thread)
             return
 
         # Case 2: existing guest
-        guest = self.db.guests_by_host(host_id)[guest_id]
-        if thread.updated_at() != guest.updated_at:
+        guest = guest_list[guest_id_list.index(guest_id)]
+        if (
+            thread.updated_at() != guest.updated_at
+            or len(thread.messages()) != guest.total_msgs
+        ):
+            # update stat only if there are new messages
             self.db.update_guest_stat(
                 host_id,
                 guest_id,
@@ -91,9 +98,11 @@ class SyncAirbnb:
         messages = self.db.messages_by_host_guest(host_id, guest_id)
 
         if not messages:
+            # if there are no existing messages, add message into a database without checking
             self._create_message(guest_id, host_id, message)
             return
 
+        # if there are existing messages, check if message is already in database
         # I'm using (msg.sent, msg.message) to emulate a hash...
         # ideally we'd implement some sort of hashing algorithm server-side so each message is uniquely identifiable
         messages_hash = [(msg.sent, msg.message) for msg in messages]
@@ -101,15 +110,3 @@ class SyncAirbnb:
 
         if current_hash not in messages_hash:
             self._create_message(guest_id, host_id, message)
-
-
-sync_1 = SyncAirbnb(AirbnbClient(), DBObject())
-sync_1(1)
-sync_1(2)
-
-sync_2 = SyncAirbnb(AirbnbClient(), DBDynamo("ben_enso_test"))
-sync_2(2)
-
-
-assert sync_1.guests == sync_2.guests
-assert sync_1.messages == sync_2.messages
